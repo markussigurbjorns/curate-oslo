@@ -22,7 +22,7 @@ async fn main() {
     let app = Router::new()
         .route(
             "/upload",
-            post(upload_file_handler).layer(RequestBodyLimitLayer::new(3 * 100 * 1000 * 1000)),
+            post(upload_file_handler).layer(RequestBodyLimitLayer::new(300_000_000)),
         )
         .route("/download/:filename", get(download_file_handler))
         .layer(DefaultBodyLimit::disable())
