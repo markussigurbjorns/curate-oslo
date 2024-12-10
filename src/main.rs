@@ -5,14 +5,18 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::limit::RequestBodyLimitLayer;
 
 #[tokio::main]
 async fn main() {
-
     //directory to create
     let storage_dir = Arc::new(Mutex::new("uploads".to_string()));
     fs::create_dir_all(&*storage_dir.lock().await).unwrap();
+
+    // Define CORS layer
+    // Todo: Only allow curate oslo domain in the future
+    let cors = CorsLayer::new().allow_origin(Any).allow_methods(Any);
 
     //set up routes
     let app = Router::new()
@@ -22,7 +26,8 @@ async fn main() {
         )
         .route("/download/:filename", get(download_file_handler))
         .layer(DefaultBodyLimit::disable())
-        .with_state(storage_dir.clone());
+        .with_state(storage_dir.clone())
+        .layer(cors);
 
     //run server
     let listener = tokio::net::TcpListener::bind("0.0.0.0:6969").await.unwrap();
@@ -71,5 +76,4 @@ async fn download_file_handler(
     } else {
         Err(axum::http::StatusCode::NOT_FOUND)
     }
-
 }
