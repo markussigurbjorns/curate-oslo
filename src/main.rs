@@ -25,6 +25,7 @@ async fn main() {
             post(upload_file_handler).layer(RequestBodyLimitLayer::new(300_000_000)),
         )
         .route("/download/:filename", get(download_file_handler))
+        .route("/play/:filename", get(play_audio_file_handler))
         .layer(DefaultBodyLimit::disable())
         .with_state(storage_dir.clone())
         .layer(cors);
@@ -61,7 +62,10 @@ async fn download_file_handler(
     let file_path = PathBuf::from(&storage_dir).join(&filename);
 
     if file_path.exists() {
-        let file = tokio::fs::File::open(file_path).await.unwrap();
+        let file = tokio::fs::File::open(file_path)
+            .await
+            .map_err(|_| axum::http::StatusCode::INTERNAL_SERVER_ERROR)?;
+        
         let stream = tokio_util::io::ReaderStream::new(file);
         let body = axum::body::Body::from_stream(stream);
 
@@ -71,6 +75,40 @@ async fn download_file_handler(
                 "Content-Disposition",
                 format!("attachment; filename=\"{}\"", filename),
             )
+            .body(body.into())
+            .unwrap())
+    } else {
+        Err(axum::http::StatusCode::NOT_FOUND)
+    }
+}
+
+async fn play_audio_file_handler(
+    State(storage_dir): State<Arc<Mutex<String>>>,
+    Path(filename): Path<String>,
+) -> Result<axum::response::Response, axum::http::StatusCode> {
+    let storage_dir = storage_dir.lock().await.clone();
+    let file_path = PathBuf::from(&storage_dir).join(&filename);
+
+    //add content-length to the headers
+    //and handle range requsests
+    if file_path.exists() {
+        let file = tokio::fs::File::open(file_path.clone())
+            .await
+            .map_err(|_| axum::http::StatusCode::INTERNAL_SERVER_ERROR)?;
+        let content_length = file.metadata().await.unwrap().len();
+        let stream = tokio_util::io::ReaderStream::new(file);
+        let body = axum::body::Body::from_stream(stream);
+
+        let content_type = match file_path.extension().and_then(|ext| ext.to_str()) {
+            Some("mp3") => "audio/mpeg",
+            Some("wav") => "audio/wav",
+            Some("ogg") => "audio/ogg",
+            _ => "application/octet-stream",
+        };
+
+        Ok(axum::response::Response::builder()
+            .header("content-type", content_type)
+            .header("content-length", content_length)
             .body(body.into())
             .unwrap())
     } else {
