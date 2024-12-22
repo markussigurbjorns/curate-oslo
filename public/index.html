@@ -1,57 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>File Uploader</title>
+  <meta charset="UTF-8" />
+  <title>3D + Upload Widget</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Upload Audio File</h1>
-  <form id="upload-form">
-    <label for="file-input">Choose a file:</label>
-    <input type="file" id="file-input" name="file" accept="audio/*" required>
-    <button type="submit">Upload</button>
-  </form>
-  <div id="upload-status"></div>
+  <!-- A container for the 3D canvas -->
+  <div id="canvas-container"></div>
 
-<audio controls>
-  <source src="http://127.0.0.1:6969/play/long.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
+  <!-- The upload widget on top -->
+  <div class="upload-container">
+    <h1>Upload Your Audio</h1>
+    <form>
+      <!-- Custom label for the file input -->
+      <label for="audio-file" class="upload-label">Choose Audio File</label>
+      <!-- Actual file input (hidden) -->
+      <input
+        type="file"
+        id="audio-file"
+        name="audio-file"
+        accept="audio/*"
+        hidden
+      />
+      <!-- Submit button -->
+      <button type="submit">Upload</button>
+    </form>
+  </div>
 
-  <script>
-    const form = document.getElementById('upload-form');
-    const statusDiv = document.getElementById('upload-status');
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const fileInput = document.getElementById('file-input');
-      if (!fileInput.files.length) {
-        statusDiv.textContent = 'Please select a file.';
-        return;
-      }
-
-      const file = fileInput.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        statusDiv.textContent = 'Uploading...';
-        const response = await fetch('http://127.0.0.1:6969/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          statusDiv.textContent = 'Upload successful!';
-        } else {
-          statusDiv.textContent = `Upload failed: ${response.statusText}`;
-        }
-      } catch (error) {
-        statusDiv.textContent = `Error: ${error.message}`;
-      }
-    });
-  </script>
+  <!-- Include Three.js from a CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
+  <!-- Include the OBJLoader from Three.js examples -->
+  <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/loaders/MTLLoader.js"></script>
+  
+  <!-- Your main JavaScript code -->
+  <script src="main.js"></script>
 </body>
 </html>

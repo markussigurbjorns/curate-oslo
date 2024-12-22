@@ -1,11 +1,12 @@
 use axum::extract::{DefaultBodyLimit, Multipart, Path, State};
 use axum::{
     http::StatusCode,
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Json},
     routing::get,
     routing::post,
     Router,
 };
+use serde::Serialize;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::PathBuf;
@@ -27,7 +28,8 @@ async fn main() {
         let listener = tokio::net::TcpListener::bind("0.0.0.0:6868").await.unwrap();
         let app = Router::new().nest_service(
             "/",
-            ServeDir::new("public").not_found_service(not_found_service),
+            //ServeDir::new("public").not_found_service(not_found_service),
+            ServeDir::new("wasm-frontend/pkg").not_found_service(not_found_service),
         );
         axum::serve(listener, app).await.unwrap();
     };
@@ -47,6 +49,7 @@ async fn main() {
                 "/upload",
                 post(upload_file_handler).layer(RequestBodyLimitLayer::new(300_000_000)),
             )
+            .route("/files", get(list_files_handler))
             .route("/download/:filename", get(download_file_handler))
             .route("/play/:filename", get(play_audio_file_handler))
             .layer(DefaultBodyLimit::disable())
@@ -65,6 +68,7 @@ async fn handler_404() -> impl IntoResponse {
     (StatusCode::NOT_FOUND,
             Html("<!DOCTYPE html><html><head><title>404</title></head><body><h1>nothing to see here</h1></body></html>"))
 }
+
 async fn upload_file_handler(
     State(storage_dir): State<Arc<Mutex<String>>>,
     mut multipart: Multipart,
@@ -81,6 +85,27 @@ async fn upload_file_handler(
             }
         }
     }
+}
+
+#[derive(Serialize)]
+struct FileInfo {
+    name: String,
+}
+
+async fn list_files_handler(State(storage_dir): State<Arc<Mutex<String>>>) -> Json<Vec<FileInfo>> {
+    let storage_dir = storage_dir.lock().await.clone();
+    let dir_path = PathBuf::from(&storage_dir);
+
+    let mut file_list = Vec::new();
+
+    if let Ok(mut entries) = tokio::fs::read_dir(dir_path).await {
+        while let Ok(Some(entry)) = entries.next_entry().await {
+            if let Ok(file_name) = entry.file_name().into_string() {
+                file_list.push(FileInfo { name: file_name });
+            }
+        }
+    }
+    Json(file_list)
 }
 
 async fn download_file_handler(

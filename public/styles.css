@@ -1,0 +1,70 @@
+/* Make the page background black, and text white */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000; /* Black background */
+  color: #fff;           /* White text */
+  font-family: sans-serif;
+}
+
+/* The container for the 3D scene canvas */
+#canvas-container {
+  position: fixed; /* Take up the full screen behind everything */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;     /* Put the 3D canvas behind other elements */
+  overflow: hidden;
+}
+
+/* The upload widget container */
+.upload-container {
+  max-width: 400px;
+  margin: 5% auto;
+  padding: 2rem;
+  text-align: center;
+  border: 2px dashed #fff;
+  border-radius: 8px;
+  z-index: 1000; /* Ensure it stays on top of the 3D canvas */
+  position: relative;
+}
+
+/* Hide the actual file input */
+input[type="file"] {
+  display: none;
+}
+
+/* Custom label as a button */
+.upload-label {
+  display: inline-block;
+  background-color: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  font-size: 1rem;
+}
+.upload-label:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+/* “Upload” button */
+button {
+  display: inline-block;
+  margin-top: 1rem;
+  background-color: #fff;
+  color: #000;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  font-size: 1rem;
+}
+button:hover {
+  background-color: #aaa;
+}
