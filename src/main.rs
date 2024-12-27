@@ -28,8 +28,8 @@ async fn main() {
         let listener = tokio::net::TcpListener::bind("0.0.0.0:6868").await.unwrap();
         let app = Router::new().nest_service(
             "/",
-            //ServeDir::new("public").not_found_service(not_found_service),
-            ServeDir::new("wasm-frontend/pkg").not_found_service(not_found_service),
+            ServeDir::new("public").not_found_service(not_found_service),
+            //ServeDir::new("wasm-frontend/pkg").not_found_service(not_found_service),
         );
         axum::serve(listener, app).await.unwrap();
     };
