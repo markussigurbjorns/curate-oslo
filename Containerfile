@@ -3,6 +3,7 @@ FROM rust:1.82 AS builder
 WORKDIR /app
 
 RUN git clone https://github.com/markussigurbjorns/curate-oslo.git /app
+#COPY ./ /app
 
 RUN cargo build --release
 

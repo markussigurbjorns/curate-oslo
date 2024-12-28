@@ -75,15 +75,45 @@ async fn upload_file_handler(
 ) {
     let storage_dir = storage_dir.lock().await.clone();
 
+    let mut alias: Option<String> = None;
+    let mut filename: Option<String> = None;
+    let mut file_bytes: Option<Vec<u8>> = None;
+
     while let Some(mut field) = multipart.next_field().await.unwrap() {
-        if let Some(filename) = field.file_name() {
-            //handle if file allready exists
-            let file_path = PathBuf::from(&storage_dir).join(filename);
-            let mut file = File::create(file_path).unwrap();
-            while let Some(chunk) = field.chunk().await.unwrap() {
-                file.write_all(&chunk).unwrap();
+        let field_name = field.name().unwrap_or("");
+
+        match field_name {
+            "alias" => {
+                alias = Some(field.text().await.unwrap_or_default());
             }
+            "file" => {
+                if let Some(fname) = field.file_name().map(|s| s.to_string()) {
+                    filename = Some(fname);
+                }
+                let mut bytes = Vec::new();
+                while let Some(chunk) = field.chunk().await.unwrap() {
+                    bytes.extend_from_slice(&chunk);
+                }
+                file_bytes = Some(bytes);
+            }
+            _ => {}
         }
+    }
+    if let (Some(bytes), Some(original_name)) = (file_bytes, filename) {
+        let new_name = if let Some(ref alias_str) = alias {
+            let new_alias: String = alias_str
+                .chars()
+                .map(|c| if c.is_whitespace() { '_' } else { c })
+                .collect();
+            format!("{}_{}", new_alias, original_name)
+        } else {
+            original_name
+        };
+
+        let file_path = PathBuf::from(&storage_dir).join(new_name);
+        let mut file = File::create(&file_path).expect("Failed to create file on the server");
+        file.write_all(&bytes)
+            .expect("Failed to write file to disk");
     }
 }
 

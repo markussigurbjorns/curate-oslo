@@ -1,7 +1,9 @@
 /* Make the page background black, and text white */
-body {
+html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
   background-color: #000; /* Black background */
   color: #fff;           /* White text */
   font-family: sans-serif;
@@ -18,16 +20,26 @@ body {
   overflow: hidden;
 }
 
+/* A wrapper to center .upload-container both vertically & horizontally */
+#center-wrapper {
+  position: relative;  /* So children can be absolutely positioned */
+  width: 100%;
+  height: 100%;
+}
+
 /* The upload widget container */
 .upload-container {
   max-width: 400px;
-  margin: 5% auto;
+  width: 90%;            /* fallback for small screens */
   padding: 2rem;
   text-align: center;
   border: 2px dashed #fff;
   border-radius: 8px;
-  z-index: 1000; /* Ensure it stays on top of the 3D canvas */
-  position: relative;
+  z-index: 1000;         /* Ensure it stays on top of the 3D canvas */
+  position: absolute;    /* So we can center with top/left + transform */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Hide the actual file input */
@@ -35,7 +47,20 @@ input[type="file"] {
   display: none;
 }
 
-/* Custom label as a button */
+/* Style for the text input (alias) */
+input[type="text"] {
+  display: block;           /* ensures it’s on its own line */
+  width: 100%;              /* fill the container’s width */
+  padding: 0.6rem;
+  margin: 1rem 0;           /* spacing around the field */
+  border: 2px solid #fff;
+  border-radius: 4px;
+  background-color: #333;    /* darker background for contrast */
+  color: #fff;
+  font-size: 1rem;
+}
+
+/* Custom label as a button for the hidden file input */
 .upload-label {
   display: inline-block;
   background-color: transparent;

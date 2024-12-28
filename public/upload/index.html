@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../styles/styles.css"/>
-  <title>File Uploader</title>
-</head>
-<body>
-  <div id="upload-container">
-  <h1>Upload Audio File</h1>
-  <form id="upload-form">
-    <label for="audio-file" class="upload-label">Choose a file:</label>
-    <input type="file" id="file-input" name="file" accept="audio/*" required>
-    <button type="submit">Upload</button>
-  </form>
-  <div id="upload-status"></div>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/styles.css" />
+    <title>File Uploader</title>
+  </head>
+  <body>
+    <div id="center-wrapper">
+      <div id="upload-container" class="upload-container">
+        <h1>Upload Audio File</h1>
+        <form id="upload-form">
+          <label for="audio-file" class="upload-label">Choose a file:</label>
+          <input type="file" id="audio-file" name="file" accept="audio/*" required>
+          <div id="selected-file-name" style="margin-top: 1rem;">No file chosen</div>
+          <input type="text" id="alias-input" placeholder="Enter your name/alias" />
+          <button type="submit">Upload</button>
+        </form>
+        <div id="upload-status"></div>
+      </div>
     </div>
-      <script type="module">
-        import init from "../wasm/wasm_frontend.js";
-
-        async function run() {
-          await init();
-        }
-        run();
+    <script type="module">
+      import init from "../wasm/wasm_frontend.js";
+      async function run() {
+        await init();
+      }
+      run();
     </script>
-</body>
+  </body>
 </html>

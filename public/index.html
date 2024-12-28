@@ -3,38 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <title>3D + Upload Widget</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./styles/styles.css" />
 </head>
 <body>
-  <!-- A container for the 3D canvas -->
   <div id="canvas-container"></div>
 
-  <!-- The upload widget on top -->
-  <div class="upload-container">
-    <h1>Upload Your Audio</h1>
-    <form>
-      <!-- Custom label for the file input -->
-      <label for="audio-file" class="upload-label">Choose Audio File</label>
-      <!-- Actual file input (hidden) -->
-      <input
-        type="file"
-        id="audio-file"
-        name="audio-file"
-        accept="audio/*"
-        hidden
-      />
-      <!-- Submit button -->
-      <button type="submit">Upload</button>
-    </form>
-  </div>
-
-  <!-- Include Three.js from a CDN -->
   <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
-  <!-- Include the OBJLoader from Three.js examples -->
+  <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/loaders/OBJLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/loaders/MTLLoader.js"></script>
   
-  <!-- Your main JavaScript code -->
   <script src="main.js"></script>
 </body>
 </html>

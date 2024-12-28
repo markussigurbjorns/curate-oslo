@@ -13,6 +13,24 @@ fn set_status_text(document: &Document, id: &str, text: &str) {
     }
 }
 
+#[wasm_bindgen]
+extern "C" {
+    // Use `js_namespace` here to bind `console.log(..)` instead of just
+    // `log(..)`
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+
+    // The `console.log` is quite polymorphic, so we can bind it with multiple
+    // signatures. Note that we need to use `js_name` to ensure we always call
+    // `log` in JS.
+    #[wasm_bindgen(js_namespace = console, js_name = log)]
+    fn log_u32(a: u32);
+
+    // Multiple arguments too!
+    #[wasm_bindgen(js_namespace = console, js_name = log)]
+    fn log_many(a: &str, b: &str);
+}
+
 // Called when the Wasm module is instantiated
 #[wasm_bindgen(start)]
 fn main() -> Result<(), JsValue> {
@@ -22,13 +40,8 @@ fn main() -> Result<(), JsValue> {
     let document = window.document().expect("should have a document on window");
     let body = document.body().expect("document should have a body");
 
-    // Manufacture the element we're gonna append
-    let val = document.create_element("p")?;
-    val.set_inner_html("Hello from Rust!");
-
-    body.append_child(&val)?;
-
     if let Some(form) = document.get_element_by_id("upload-form") {
+
         let window_clone = window.clone();
         let document_clone = document.clone();
 
@@ -36,7 +49,7 @@ fn main() -> Result<(), JsValue> {
             event.prevent_default();
 
             let file_input = document_clone
-                .get_element_by_id("file-input")
+                .get_element_by_id("audio-file")
                 .unwrap()
                 .dyn_into::<HtmlInputElement>()
                 .unwrap();
@@ -51,19 +64,32 @@ fn main() -> Result<(), JsValue> {
 
             set_status_text(&document_clone, "upload-status", "Uploading...");
 
+            let alias_input = document_clone
+                .get_element_by_id("alias-input")
+                .unwrap()
+                .dyn_into::<HtmlInputElement>()
+                .unwrap();
+
+            let alias = alias_input.value();
+
             let window_async = window_clone.clone();
             let document_async = document_clone.clone();
 
             spawn_local(async move {
                 let form_data = FormData::new().unwrap();
+                form_data.append_with_str("alias", &alias).unwrap();
                 form_data.append_with_blob("file", &file).unwrap();
 
                 let mut opts = RequestInit::new();
                 opts.set_method("POST");
                 opts.body(Some(&form_data));
 
+                log("before calling the url");
+                
                 let url = "http://127.0.0.1:6969/upload";
                 let resp_promise = window_async.fetch_with_str_and_init(url, &opts);
+                log("after creating promise");
+
                 let resp: Response = match JsFuture::from(resp_promise).await {
                     Ok(r) => r.dyn_into().unwrap(),
                     Err(e) => {
@@ -75,7 +101,7 @@ fn main() -> Result<(), JsValue> {
                         return;
                     }
                 };
-
+                log("resovling the promise");
                 if resp.ok() {
                     set_status_text(&document_async, "upload-status", "Upload successful!");
                 } else {
@@ -88,12 +114,40 @@ fn main() -> Result<(), JsValue> {
                 }
             });
         }) as Box<dyn FnMut(_)>);
-
         form.add_event_listener_with_callback("submit", closure.as_ref().unchecked_ref())
             .unwrap();
         closure.forget();
     } else {
         web_sys::console::error_1(&"Could not find form with id 'upload-form'".into());
+    }
+
+        // Set up the "change" event on the input
+    if let Some(audio_file_input) = document.get_element_by_id("audio-file") {
+        let document_clone = document.clone();
+
+        let on_change = Closure::wrap(Box::new(move |event: web_sys::Event| {
+            let input = event
+                .target()
+                .unwrap()
+                .dyn_into::<web_sys::HtmlInputElement>()
+                .unwrap();
+
+            // Get the first file (if any)
+            if let Some(file_list) = input.files() {
+                if let Some(file) = file_list.get(0) {
+                    // Get the file name
+                    let file_name = file.name();
+                    // Show it in #selected-file-name
+                    if let Some(selected_file_div) = document_clone.get_element_by_id("selected-file-name") {
+                        selected_file_div.set_inner_html(&file_name);
+                    }
+                }
+            }
+        }) as Box<dyn FnMut(_)>);
+
+        audio_file_input
+            .add_event_listener_with_callback("change", on_change.as_ref().unchecked_ref())?;
+        on_change.forget();
     }
 
     Ok(())
