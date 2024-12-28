@@ -40,7 +40,7 @@ function init() {
   // mtlLoader.setPath('./models/');
 
   mtlLoader.load(
-    'models/model.mtl', 
+    'model.mtl', 
     function (materials) {
       // Preload all materials
       materials.preload();
@@ -53,7 +53,7 @@ function init() {
       // objLoader.setPath('./models/');
 
       objLoader.load(
-        'models/model.obj',
+        'model.obj',
         function (obj) {
           // Optionally, center the model:
           // obj.position.set(0, 0, 0);

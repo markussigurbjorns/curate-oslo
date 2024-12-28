@@ -7,17 +7,18 @@ html, body {
   background-color: #000; /* Black background */
   color: #fff;           /* White text */
   font-family: sans-serif;
+  overflow: hidden
 }
 
 /* The container for the 3D scene canvas */
 #canvas-container {
-  position: fixed; /* Take up the full screen behind everything */
-  top: 0;
-  left: 0;
+  //position: fixed; /* Take up the full screen behind everything */
+  //top: 0;
+  //left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;     /* Put the 3D canvas behind other elements */
-  overflow: hidden;
+  //z-index: -1;     /* Put the 3D canvas behind other elements */
+  //overflow: hidden;
 }
 
 /* A wrapper to center .upload-container both vertically & horizontally */
