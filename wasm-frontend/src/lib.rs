@@ -86,7 +86,7 @@ fn main() -> Result<(), JsValue> {
 
                 log("before calling the url");
                 
-                let url = "http://9.163.91.15:6969/upload";
+                let url = "https://9.163.91.15:7000/upload";
                 let resp_promise = window_async.fetch_with_str_and_init(url, &opts);
                 log("after creating promise");
 
@@ -163,7 +163,7 @@ pub fn add_audio_element(track: &str) -> Result<(), JsValue> {
     let audio_el = document.create_element("audio")?;
     audio_el.set_attribute("controls", "")?;
 
-    let connection_string = format!("http://9.163.91.15:6969/play/{}", track);
+    let connection_string = format!("https://9.163.91.15:7000/play/{}", track);
     let source_el = document.create_element("source")?;
     source_el.set_attribute("src", &connection_string)?;
     source_el.set_attribute("type", "audio/mpeg")?;
